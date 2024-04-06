@@ -11,6 +11,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
 import com.javachat.message.Message;
+import com.javachat.client.ChatClient;
+
+import java.util.function.Consumer;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -35,7 +38,13 @@ public class PrimaryController {
     @FXML
     private Button sendButton;
 
+    Consumer<Message> updateChatWindow = message -> {
+        Platform.runLater(() -> addMessage(message));
+    };
+
     public void initialize() {
+
+        ChatClient chatClient = new ChatClient("127.0.0.1", 5000, updateChatWindow);
 
         Platform.runLater(() -> chatTextField.requestFocus());
 
@@ -104,30 +113,33 @@ public class PrimaryController {
 
     @FXML
     private void handleSendButtonPress(ActionEvent event) {
-        String msg = chatTextField.getText();
-        if (msg.trim().isEmpty()) {
+        String txt = chatTextField.getText();
+        if (txt.trim().isEmpty()) {
             return; // Do not send empty messages
         }
 
+        Message msg = new Message(txt, true);
         chatTextField.clear();
-        addMessage(msg, true);
+        addMessage(msg);
         chatListView.scrollTo(chatListView.getItems().size() - 1);
 
     }
 
-    public void addMessage(String text, boolean isSent) {
-        chatListView.getItems().add(new Message(text, isSent));
+    public void addMessage(Message message) {
+        chatListView.getItems().add(message);
         chatTextField.requestFocus();
     }
 
     private void handleEnterKeyPress(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            String msg = chatTextField.getText();
-            if (msg.trim().isEmpty()) {
-                return;
+            String txt = chatTextField.getText();
+            if (txt.trim().isEmpty()) {
+                return; // Do not send empty messages
             }
+
+            Message msg = new Message(txt, true);
             chatTextField.clear();
-            addMessage(msg, true);
+            addMessage(msg);
             chatListView.scrollTo(chatListView.getItems().size() - 1);
         }
     }
