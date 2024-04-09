@@ -29,7 +29,6 @@ import javafx.scene.layout.CornerRadii;
 import javafx.geometry.Insets;
 
 import com.javachat.server.Server;
-
 import com.google.gson.Gson;
 
 public class PrimaryController {
@@ -52,12 +51,15 @@ public class PrimaryController {
     };
 
     public void initialize() {
-
         Server server = new Server();
+        System.out.println("Server started");
         serverThread = new Thread(server);
         serverThread.setDaemon(true); // Set the server thread as a daemon so it doesn't prevent the application from
                                       // exiting
         serverThread.start();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            server.stop();
+        }));
 
         chatClient = new ChatClient("127.0.0.1", 5000, updateChatWindow);
 

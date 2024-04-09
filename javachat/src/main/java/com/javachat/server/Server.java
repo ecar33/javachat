@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
@@ -22,14 +23,14 @@ public class Server implements Runnable {
         final Scanner sc = new Scanner(System.in);
 
         try {
-            serverSocket = new ServerSocket(5000);
+            serverSocket = new ServerSocket(5000, 50, InetAddress.getLoopbackAddress());
             clientSocket = serverSocket.accept();
             out = new PrintWriter(clientSocket.getOutputStream());
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             Gson gson = new Gson();
 
             Thread sender = new Thread(new Runnable() {
-                String line; // variable that will contains the data writter by the user
+                String line;
                 String jsonMessage;
 
                 @Override // annotation to override the run method
@@ -56,6 +57,11 @@ public class Server implements Runnable {
                             Message msg = gson.fromJson(jsonMessage, Message.class);
 
                             System.out.println("Recieved from client: " + msg.getText());
+
+                            Message echoMsg = new Message(msg.getText(), false);
+                            jsonMessage = gson.toJson(echoMsg);
+                            out.println(jsonMessage); // write data stored in msg in the clientSocket
+                            out.flush(); // forces the sending of the data
 
                             jsonMessage = in.readLine();
                         }
