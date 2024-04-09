@@ -6,12 +6,15 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.function.Consumer;
 import com.javachat.message.Message;
+import com.google.gson.Gson;
+
 
 public class ChatClient {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
     private Consumer<Message> onMessageReceived;
+    Gson gson = new Gson();
 
     public ChatClient(String serverAddress, int port, Consumer<Message> onMessageReceived) {
         try {
@@ -20,14 +23,13 @@ public class ChatClient {
             // messages
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
             new Thread(() -> {
                 try {
-                    String line;
+                    String jsonString;
                     // Continuously read messages from the server
-                    while ((line = in.readLine()) != null) {
+                    while ((jsonString = in.readLine()) != null) {
                         // Use the Consumer to handle the received message
-                        Message msg = new Message(line, false);
+                        Message msg = gson.fromJson(jsonString, Message.class);
                         onMessageReceived.accept(msg);
                     }
                 } catch (Exception e) {
@@ -42,7 +44,9 @@ public class ChatClient {
     }
 
     public void sendMessage(Message msg) {
-        out.println(msg);
+        String jsonMessage = new Gson().toJson(msg); // Serialize the message to JSON
+        out.println(jsonMessage); // Send the JSON string to the server
+        out.flush(); // Ensure the data is sent immediately
     }
 
 }

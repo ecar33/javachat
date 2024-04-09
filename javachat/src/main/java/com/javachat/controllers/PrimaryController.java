@@ -11,6 +11,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
 import com.javachat.message.Message;
+import com.javachat.server.Server;
 import com.javachat.client.ChatClient;
 
 import java.util.function.Consumer;
@@ -27,7 +28,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.layout.CornerRadii;
 import javafx.geometry.Insets;
 
+import com.javachat.server.Server;
+
+import com.google.gson.Gson;
+
 public class PrimaryController {
+
+    private ChatClient chatClient;
+
+    private Thread serverThread;
 
     @FXML
     private TextField chatTextField;
@@ -44,7 +53,13 @@ public class PrimaryController {
 
     public void initialize() {
 
-        ChatClient chatClient = new ChatClient("127.0.0.1", 5000, updateChatWindow);
+        Server server = new Server();
+        serverThread = new Thread(server);
+        serverThread.setDaemon(true); // Set the server thread as a daemon so it doesn't prevent the application from
+                                      // exiting
+        serverThread.start();
+
+        chatClient = new ChatClient("127.0.0.1", 5000, updateChatWindow);
 
         Platform.runLater(() -> chatTextField.requestFocus());
 
@@ -119,6 +134,7 @@ public class PrimaryController {
         }
 
         Message msg = new Message(txt, true);
+        chatClient.sendMessage(msg);
         chatTextField.clear();
         addMessage(msg);
         chatListView.scrollTo(chatListView.getItems().size() - 1);
@@ -138,6 +154,8 @@ public class PrimaryController {
             }
 
             Message msg = new Message(txt, true);
+            chatClient.sendMessage(msg);
+
             chatTextField.clear();
             addMessage(msg);
             chatListView.scrollTo(chatListView.getItems().size() - 1);
