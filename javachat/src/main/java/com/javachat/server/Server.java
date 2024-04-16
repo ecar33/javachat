@@ -6,13 +6,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import com.javachat.message.SentMessage;
+import java.util.concurrent.ConcurrentHashMap;
+import com.javachat.message.*;
 import com.google.gson.Gson;
 
 public class Server implements Runnable {
     private ServerSocket serverSocket;
     private final Gson gson = new Gson();
+    private static ConcurrentHashMap<String, ClientHandler> activeClients = new ConcurrentHashMap<>();
+
 
     @Override
     public void run() {
@@ -45,15 +47,18 @@ public class Server implements Runnable {
 
                 // Read the first message which should be the userID
                 this.clientUserID = in.readLine();
+                
 
                 if (clientUserID != null) {
                     System.out.println("Client connected with UID: " + clientUserID);
+                    activeClients.put(clientUserID, this);
                 }
 
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
                     SentMessage message = gson.fromJson(inputLine, SentMessage.class);
                     System.out.println("Received from " + clientUserID + " : " + message.getText());
+                    broadcastMessage(message, clientUserID);
                 }
 
             } catch (IOException e) {
@@ -61,11 +66,35 @@ public class Server implements Runnable {
             } finally {
                 try {
                     clientSocket.close();
+                    activeClients.remove(clientUserID);  // Remove client from the map
+                    System.out.println("Client disconnected with UID: " + clientUserID);
+
                 } catch (IOException e) {
                     System.out.println("Could not close a socket: " + e.getMessage());
                 }
             }
         }
+    
+        public void sendMessage(Message msg) {
+            Gson gson = new Gson();
+            PrintWriter out;
+            try {
+                out = new PrintWriter(this.clientSocket.getOutputStream(), true);
+                String jsonMessage = gson.toJson(msg); // Serialize the message to JSON
+                out.println(jsonMessage); // Send the JSON string to the server
+                out.flush(); // Ensure the data is sent immediately
+            } catch (IOException e) {
+                System.out.println("Failed to send message to " + clientUserID + ": " + e.getMessage());
+            }
+        }
+    }
+
+    public void broadcastMessage(Message message, String senderUserID) {
+        activeClients.forEach((uid, handler) -> {
+            if (!uid.equals(senderUserID)) {
+                handler.sendMessage(message);
+            }
+        });
     }
 
     public static void main(String[] args) {
