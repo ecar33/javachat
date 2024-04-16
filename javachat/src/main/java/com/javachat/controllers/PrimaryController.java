@@ -10,6 +10,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
+import com.javachat.message.*;
 import com.javachat.server.Server;
 import com.javachat.client.ChatClient;
 
@@ -27,12 +28,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.layout.CornerRadii;
 import javafx.geometry.Insets;
 
-import com.javachat.message.*;
+import com.javachat.server.Server;
 import com.google.gson.Gson;
 
 public class PrimaryController {
 
     private ChatClient chatClient;
+    private String clientUserID;
 
     private Thread serverThread;
 
@@ -45,22 +47,13 @@ public class PrimaryController {
     @FXML
     private Button sendButton;
 
-    Consumer<Message> addReceivedMessage = message -> {
-        Platform.runLater(() -> addMessage(message));
+    Consumer<Message> updateChatWindow = message -> {
+        Platform.runLater(() -> addMessageToChatListView(message));
     };
 
     public void initialize() {
-        Server server = new Server();
-        System.out.println("Server started");
-        serverThread = new Thread(server);
-        serverThread.setDaemon(true); // Set the server thread as a daemon so it doesn't prevent the application from
-                                      // exiting
-        serverThread.start();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            server.stop();
-        }));
-
-        chatClient = new ChatClient("127.0.0.1", 5000, addReceivedMessage);
+        chatClient = new ChatClient("127.0.0.1", 5000, updateChatWindow);
+        clientUserID = chatClient.getUserID();
 
         Platform.runLater(() -> chatTextField.requestFocus());
 
@@ -72,34 +65,25 @@ public class PrimaryController {
 
         chatListView.setCellFactory(param -> new ListCell<Message>() {
             @Override
-            protected void updateItem(Message msg, boolean empty) {
-                super.updateItem(msg, empty);
+            protected void updateItem(Message message, boolean empty) {
+                super.updateItem(message, empty);
 
-                if (empty || msg == null) {
+                if (empty || message == null) {
                     setText(null);
                     setGraphic(null);
-                    setStyle(null);
                 } else {
-                    setText(msg.getTextRepresentation());
-                    setStyle(msg.getStyleClass());
+                    setText(message.getTextRepresentation());
+                    setStyle(message.getStyleClass());
+                    setBackground(Background.EMPTY);
                 }
-
             }
         });
-        // Load the image
-        Image image = new Image(getClass().getResourceAsStream("/com/javachat/background.png"));
-        if (image.isError()) {
-            System.out.println("Image loading failed: " + image.getException());
-        }
-        // Create a BackgroundImage
-        BackgroundImage bgImage = new BackgroundImage(image,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.CENTER,
-                new BackgroundSize(100, 100, true, true, false, true));
 
         // Set the BackgroundImage
-        chatListView.setBackground(new Background(bgImage));
+        BackgroundImage bgImage = BGImageLoader.load("/com/javachat/background.png");
+        if (bgImage != null) {
+            chatListView.setBackground(new Background(bgImage));
+        }
     }
 
     @FXML
@@ -122,38 +106,33 @@ public class PrimaryController {
 
     @FXML
     private void handleSendButtonPress(ActionEvent event) {
-        String txt = chatTextField.getText();
-        if (txt.trim().isEmpty()) {
-            return; // Do not send empty messages
-        }
-
-        SentMessage msg = new SentMessage(txt);
-        chatClient.sendMessage(msg);
-        chatTextField.clear();
-        addMessage(msg);
-        chatListView.scrollTo(chatListView.getItems().size() - 1);
+        sendMessage();
 
     }
 
-    public void addMessage(Message message) {
+    public void addMessageToChatListView(Message message) {
         chatListView.getItems().add(message);
         chatTextField.requestFocus();
     }
 
     private void handleEnterKeyPress(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            String txt = chatTextField.getText();
-            if (txt.trim().isEmpty()) {
-                return; // Do not send empty messages
-            }
-
-            SentMessage msg = new SentMessage(txt);
-            chatClient.sendMessage(msg);
-
-            chatTextField.clear();
-            addMessage(msg);
-            chatListView.scrollTo(chatListView.getItems().size() - 1);
+            sendMessage();
         }
+    }
+
+    private void sendMessage() {
+        String txt = chatTextField.getText();
+        if (txt.trim().isEmpty()) {
+            return; // Do not send empty messages
+        }
+
+        SentMessage msg = new SentMessage(txt, clientUserID);
+        chatClient.sendMessage(msg);
+
+        chatTextField.clear();
+        addMessageToChatListView(msg);
+        chatListView.scrollTo(chatListView.getItems().size() - 1);
     }
 
 }

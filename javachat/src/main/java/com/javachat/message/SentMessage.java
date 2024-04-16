@@ -2,9 +2,9 @@ package com.javachat.message;
 
 public class SentMessage implements Message{
   private final String text;
-  private final int userID;
+  private final String userID;
 
-  public SentMessage(String text, int userID) {
+  public SentMessage(String text, String userID) {
     this.text = text;
     this.userID = userID;
   }
@@ -13,7 +13,7 @@ public class SentMessage implements Message{
     return text;
   }
 
-  public int userID() {
+  public String getUserID() {
     return userID;
   }
 

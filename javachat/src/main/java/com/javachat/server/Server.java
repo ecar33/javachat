@@ -4,105 +4,82 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
 
 import com.javachat.message.SentMessage;
 import com.google.gson.Gson;
 
 public class Server implements Runnable {
     private ServerSocket serverSocket;
+    private final Gson gson = new Gson();
 
     @Override
     public void run() {
-        final Socket clientSocket;
-        final BufferedReader in;
-        final PrintWriter out;
-        final Scanner sc = new Scanner(System.in);
-        final Gson gson = new Gson();
-
-
         try {
-            serverSocket = new ServerSocket(5000, 50, InetAddress.getLoopbackAddress());
-            clientSocket = serverSocket.accept();
-            out = new PrintWriter(clientSocket.getOutputStream());
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            serverSocket = new ServerSocket(5000);
+            System.out.println("Server has started, waiting for connections...");
 
-            Thread sender = new Thread(new Runnable() {
-                String line;
-                String jsonMessage;
-
-                @Override // annotation to override the run method
-                public void run() {
-                    while (true) {
-                        line = sc.nextLine(); // reads data from user's keybord
-                        jsonMessage = gson.toJson(msg);
-                        out.println(jsonMessage); // write data stored in msg in the clientSocket
-                        out.flush(); // forces the sending of the data
-                    }
-                }
-            });
-            sender.start();
-
-            Thread receive = new Thread(new Runnable() {
-                String jsonMessage;
-
-                @Override
-                public void run() {
-                    try {
-                        jsonMessage = in.readLine();
-                        while (jsonMessage != null) {
-                            SentMessage msg = gson.fromJson(jsonMessage, SentMessage.class);
-
-                            System.out.println("Recieved from client: " + msg.getText());
-
-                            jsonMessage = gson.toJson(echoMsg);
-                            out.println(jsonMessage); // write data stored in msg in the clientSocket
-                            out.flush(); // forces the sending of the data
-
-                            jsonMessage = in.readLine();
-                        }
-
-                        System.out.println("Client disconnected");
-
-                        out.close();
-                        clientSocket.close();
-                        serverSocket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        try {
-                            // Close resources
-                            if (out != null) {
-                                out.close();
-                            }
-                            if (clientSocket != null) {
-                                clientSocket.close();
-                            }
-                            if (serverSocket != null) {
-                                serverSocket.close();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
-            receive.start();
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                new Thread(new ClientHandler(clientSocket)).start();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void stop() {
-        try {
-            if (serverSocket != null && !serverSocket.isClosed()) {
-                serverSocket.close();
+    private class ClientHandler implements Runnable {
+        private Socket clientSocket;
+        private String clientUserID;
+
+        public ClientHandler(Socket socket) {
+            this.clientSocket = socket;
+        }
+
+        @Override
+        public void run() {
+            try (
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));) {
+
+                // Read the first message which should be the userID
+                this.clientUserID = in.readLine();
+
+                if (clientUserID != null) {
+                    System.out.println("Client connected with UID: " + clientUserID);
+                }
+
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    SentMessage message = gson.fromJson(inputLine, SentMessage.class);
+                    System.out.println("Received from " + clientUserID + " : " + message.getText());
+                }
+
+            } catch (IOException e) {
+                System.out.println("Error handling client #" + clientSocket + ": " + e.getMessage());
+            } finally {
+                try {
+                    clientSocket.close();
+                } catch (IOException e) {
+                    System.out.println("Could not close a socket: " + e.getMessage());
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        Server server = new Server();
+        Thread serverThread = new Thread(server);
+        serverThread.start();
+
+        System.out.println("Server started and waiting for connections...");
+
+        try {
+            serverThread.join();
+        } catch (InterruptedException e) {
+            System.out.println("Server thread was interrupted");
+            Thread.currentThread().interrupt(); // Set the interrupt flag again
         }
     }
 }
