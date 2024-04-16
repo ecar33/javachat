@@ -10,7 +10,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
-import com.javachat.message.Message;
 import com.javachat.server.Server;
 import com.javachat.client.ChatClient;
 
@@ -28,7 +27,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.layout.CornerRadii;
 import javafx.geometry.Insets;
 
-import com.javachat.server.Server;
+import com.javachat.message.*;
 import com.google.gson.Gson;
 
 public class PrimaryController {
@@ -46,7 +45,7 @@ public class PrimaryController {
     @FXML
     private Button sendButton;
 
-    Consumer<Message> updateChatWindow = message -> {
+    Consumer<Message> addReceivedMessage = message -> {
         Platform.runLater(() -> addMessage(message));
     };
 
@@ -61,7 +60,7 @@ public class PrimaryController {
             server.stop();
         }));
 
-        chatClient = new ChatClient("127.0.0.1", 5000, updateChatWindow);
+        chatClient = new ChatClient("127.0.0.1", 5000, addReceivedMessage);
 
         Platform.runLater(() -> chatTextField.requestFocus());
 
@@ -73,25 +72,18 @@ public class PrimaryController {
 
         chatListView.setCellFactory(param -> new ListCell<Message>() {
             @Override
-            protected void updateItem(Message message, boolean empty) {
-                super.updateItem(message, empty);
+            protected void updateItem(Message msg, boolean empty) {
+                super.updateItem(msg, empty);
 
-                if (empty || message == null) {
+                if (empty || msg == null) {
                     setText(null);
                     setGraphic(null);
+                    setStyle(null);
                 } else {
-                    if (message.isSent()) {
-                        // Customize for sent message
-                        setText("Me: " + message.getText());
-                        setStyle("-fx-text-fill: blue; -fx-alignment: center-right;");
-                        setBackground(Background.EMPTY); // Use Background.EMPTY
-                    } else {
-                        // Customize for received message
-                        setText("Them: " + message.getText());
-                        setStyle("-fx-text-fill: black; -fx-alignment: center-left;");
-                        setBackground(Background.EMPTY); // Use Background.EMPTY
-                    }
+                    setText(msg.getTextRepresentation());
+                    setStyle(msg.getStyleClass());
                 }
+
             }
         });
         // Load the image
@@ -135,7 +127,7 @@ public class PrimaryController {
             return; // Do not send empty messages
         }
 
-        Message msg = new Message(txt, true);
+        SentMessage msg = new SentMessage(txt);
         chatClient.sendMessage(msg);
         chatTextField.clear();
         addMessage(msg);
@@ -155,7 +147,7 @@ public class PrimaryController {
                 return; // Do not send empty messages
             }
 
-            Message msg = new Message(txt, true);
+            SentMessage msg = new SentMessage(txt);
             chatClient.sendMessage(msg);
 
             chatTextField.clear();

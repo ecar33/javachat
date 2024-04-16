@@ -9,7 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-import com.javachat.message.Message;
+import com.javachat.message.SentMessage;
 import com.google.gson.Gson;
 
 public class Server implements Runnable {
@@ -21,13 +21,14 @@ public class Server implements Runnable {
         final BufferedReader in;
         final PrintWriter out;
         final Scanner sc = new Scanner(System.in);
+        final Gson gson = new Gson();
+
 
         try {
             serverSocket = new ServerSocket(5000, 50, InetAddress.getLoopbackAddress());
             clientSocket = serverSocket.accept();
             out = new PrintWriter(clientSocket.getOutputStream());
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            Gson gson = new Gson();
 
             Thread sender = new Thread(new Runnable() {
                 String line;
@@ -37,7 +38,6 @@ public class Server implements Runnable {
                 public void run() {
                     while (true) {
                         line = sc.nextLine(); // reads data from user's keybord
-                        Message msg = new Message(line, false);
                         jsonMessage = gson.toJson(msg);
                         out.println(jsonMessage); // write data stored in msg in the clientSocket
                         out.flush(); // forces the sending of the data
@@ -54,11 +54,10 @@ public class Server implements Runnable {
                     try {
                         jsonMessage = in.readLine();
                         while (jsonMessage != null) {
-                            Message msg = gson.fromJson(jsonMessage, Message.class);
+                            SentMessage msg = gson.fromJson(jsonMessage, SentMessage.class);
 
                             System.out.println("Recieved from client: " + msg.getText());
 
-                            Message echoMsg = new Message(msg.getText(), false);
                             jsonMessage = gson.toJson(echoMsg);
                             out.println(jsonMessage); // write data stored in msg in the clientSocket
                             out.flush(); // forces the sending of the data

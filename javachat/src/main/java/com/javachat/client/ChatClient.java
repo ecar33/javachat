@@ -13,7 +13,7 @@ public class ChatClient {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-    Gson gson = new Gson();
+    private Gson gson = new Gson();
 
     public ChatClient(String serverAddress, int port, Consumer<Message> onMessageReceived) {
         try {
