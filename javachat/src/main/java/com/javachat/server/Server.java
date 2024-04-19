@@ -20,8 +20,7 @@ public class Server implements Runnable {
     public void run() {
         try {
             serverSocket = new ServerSocket(5000);
-            System.out.println("Server has started, waiting for connections...");
-
+            
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 new Thread(new ClientHandler(clientSocket)).start();
@@ -56,9 +55,17 @@ public class Server implements Runnable {
 
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
-                    SentMessage message = gson.fromJson(inputLine, SentMessage.class);
-                    System.out.println("Received from " + clientUserID + " : " + message.getText());
-                    broadcastMessage(message, clientUserID);
+                    // Deserialize as SentMessage
+                    SentMessage incomingMessage = gson.fromJson(inputLine, SentMessage.class);
+                    
+                    // Log to server console
+                    System.out.println("Received from " + clientUserID + " : " + incomingMessage.getText());
+
+                    // Create new ReceivedMessage for broadcasting
+                    ReceivedMessage messageToBroadcast = new ReceivedMessage(incomingMessage.getText(), clientUserID);
+
+                    // Broadcast Message
+                    broadcastMessage(messageToBroadcast, clientUserID);
                 }
 
             } catch (IOException e) {
