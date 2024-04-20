@@ -11,7 +11,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
 import com.javachat.message.*;
-import com.javachat.server.Server;
 import com.javachat.client.ChatClient;
 
 import java.util.function.Consumer;
@@ -21,22 +20,17 @@ import javafx.event.ActionEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
 import javafx.scene.paint.Color;
 import javafx.scene.layout.CornerRadii;
 import javafx.geometry.Insets;
 
-import com.javachat.server.Server;
-import com.google.gson.Gson;
+import com.javachat.user.User;
+
 
 public class PrimaryController {
 
     private ChatClient chatClient;
-    private String clientUserID;
-
-    private Thread serverThread;
+    private User user;
 
     @FXML
     private TextField chatTextField;
@@ -51,11 +45,14 @@ public class PrimaryController {
         Platform.runLater(() -> addMessageToChatListView(message));
     };
 
-    public void initialize() {
-        chatClient = new ChatClient("127.0.0.1", 5000, updateChatWindow);
-        clientUserID = chatClient.getUserID();
 
-        Platform.runLater(() -> chatTextField.requestFocus());
+    public void initialize() {
+        // Dummy user for testing:
+        this.user = new User("Jimmybob");
+
+        // Start user session
+        setupClient(user);
+
 
         // Set the initial background color of sendButton
         sendButton.setBackground(
@@ -84,6 +81,12 @@ public class PrimaryController {
         if (bgImage != null) {
             chatListView.setBackground(new Background(bgImage));
         }
+    }
+
+    private void setupClient(User user) {
+        chatClient = new ChatClient(user, "127.0.0.1", 5000, updateChatWindow);
+
+        Platform.runLater(() -> chatTextField.requestFocus());
     }
 
     @FXML
@@ -127,7 +130,7 @@ public class PrimaryController {
             return; // Do not send empty messages
         }
 
-        SentMessage msg = new SentMessage(txt, clientUserID);
+        SentMessage msg = new SentMessage(txt, user.getUserId());
         chatClient.sendMessage(msg);
 
         chatTextField.clear();

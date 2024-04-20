@@ -9,7 +9,7 @@ public class SentMessage implements Message{
     this.userID = userID;
   }
 
-  public String getText() {
+  public String getContent() {
     return text;
   }
 
@@ -19,7 +19,7 @@ public class SentMessage implements Message{
 
   @Override
   public String getTextRepresentation() {
-      return "Me: " + text;
+      return "Me with id: " + userID + text;
   }
 
   @Override

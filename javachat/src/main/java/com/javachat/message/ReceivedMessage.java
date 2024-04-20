@@ -2,24 +2,24 @@ package com.javachat.message;
 
 public class ReceivedMessage implements Message{
   private final String text;
-  private final String userID;
+  private final String senderUserID;
 
-  public ReceivedMessage(String text, String userID) {
+  public ReceivedMessage(String text, String senderUserID) {
     this.text = text;
-    this.userID = userID;
+    this.senderUserID = senderUserID;
   }
 
-  public String getText() {
+  public String getContent() {
     return text;
   }
 
-  public String getUserID() {
-    return userID;
+  public String getSenderUserID() {
+    return senderUserID;
   }
 
   @Override
   public String getTextRepresentation() {
-      return "Them: " + text;
+      return "Them with id: " + senderUserID + text;
   }
 
   @Override
