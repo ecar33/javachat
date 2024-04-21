@@ -23,6 +23,7 @@ public class SessionManager {
   }
 
   public void printSessions() {
+    System.out.println("Current connected users: ");
     activeSessions.forEach((key, value) -> System.out.println(key + " = " + value));
   }
 

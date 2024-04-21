@@ -5,7 +5,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -26,10 +25,9 @@ import javafx.geometry.Insets;
 
 import com.javachat.user.User;
 
-
 public class PrimaryController {
 
-    private ChatClient chatClient;
+    private ChatClient client;
     private User user;
 
     @FXML
@@ -45,15 +43,7 @@ public class PrimaryController {
         Platform.runLater(() -> addMessageToChatListView(message));
     };
 
-
     public void initialize() {
-        // Dummy user for testing:
-        this.user = new User("Jimmybob");
-
-        // Start user session
-        setupClient(user);
-
-
         // Set the initial background color of sendButton
         sendButton.setBackground(
                 new Background(new BackgroundFill(Color.rgb(0, 196, 65), CornerRadii.EMPTY, Insets.EMPTY)));
@@ -83,10 +73,14 @@ public class PrimaryController {
         }
     }
 
-    private void setupClient(User user) {
-        chatClient = new ChatClient(user, "127.0.0.1", 5000, updateChatWindow);
-
-        Platform.runLater(() -> chatTextField.requestFocus());
+    public void setupClient() {
+        if (client != null) {
+            client.startReceivingMessages(updateChatWindow);
+            Platform.runLater(() -> chatTextField.requestFocus());
+        } else {
+            System.out.println("Client is not set properly for controller.");
+        }
+ 
     }
 
     @FXML
@@ -131,11 +125,19 @@ public class PrimaryController {
         }
 
         SentMessage msg = new SentMessage(txt, user.getUserId());
-        chatClient.sendMessage(msg);
+        client.sendMessage(msg);
 
         chatTextField.clear();
         addMessageToChatListView(msg);
         chatListView.scrollTo(chatListView.getItems().size() - 1);
+    }
+
+    public void setChatClient(ChatClient client) {
+        this.client = client;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }

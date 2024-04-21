@@ -2,6 +2,9 @@ package com.javachat.server;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeoutException;
+
 import com.javachat.message.*;
 import com.google.gson.Gson;
 
@@ -25,16 +28,20 @@ public class UserSession {
 
   public void processMessages() {
     try {
+      // socket.setSoTimeout(1000);
       String inputLine;
       while ((inputLine = in.readLine()) != null) {
         // Deserialize input to a SentMessage object
         SentMessage message = gson.fromJson(inputLine, SentMessage.class);
         handleMessage(message);
       }
+    } catch (SocketTimeoutException ste) {
+      System.out.println("Socket timed out waiting for client message for user " + userId);
     } catch (IOException e) {
       System.out.println("Error processing messages for " + userId);
+    } finally {
+      closeSession();
     }
-
   }
 
   public void sendMessage(Message message) {
@@ -52,7 +59,13 @@ public class UserSession {
 
   public void closeSession() {
     try {
-      socket.close();
+      if (in != null)
+        in.close();
+      if (out != null)
+        out.close();
+      if (socket != null && !socket.isClosed())
+        socket.close();
+
     } catch (IOException e) {
       System.out.println("Error closing socket for user " + userId);
     }

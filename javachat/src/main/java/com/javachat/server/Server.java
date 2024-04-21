@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import com.javachat.cli.CommandListener;
 
 public class Server implements Runnable {
     private ServerSocket serverSocket;
@@ -46,13 +47,12 @@ public class Server implements Runnable {
             try {
                 // Create a temp reader to read the userId sent by the client
                 BufferedReader tempReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                String userId = tempReader.readLine(); // Assuming the first line is the userId
+                userId = tempReader.readLine(); // Assuming the first line is the userId
 
                 if (userId != null) {
                     System.out.println("Client connected with userID: " + userId);
                     this.userSession = new UserSession(clientSocket, userId, server);
                     sessionManager.addSession(userId, userSession);
-                    sessionManager.printSessions();
                     userSession.processMessages();
                 } else {
                     System.out.println("Failed to read userId from the client.");
@@ -62,8 +62,10 @@ public class Server implements Runnable {
             } finally {
                 if (userId != null) {
                     sessionManager.removeSession(userId);
+                    System.out.println("Session for user with id " + userId + "removed.");
                     if (userSession != null) {
                         userSession.closeSession();
+                        System.out.println("Session closed for user with id " + userId);
                     }
                 }
             }
@@ -78,8 +80,14 @@ public class Server implements Runnable {
         Server server = new Server();
         Thread serverThread = new Thread(server);
         serverThread.start();
-
         System.out.println("Server started and waiting for connections...");
+
+
+        CommandListener cli = new CommandListener(server);
+        Thread commandThread = new Thread(cli);
+        commandThread.start();
+
+        System.out.println("Command listener started");
 
         try {
             serverThread.join();
