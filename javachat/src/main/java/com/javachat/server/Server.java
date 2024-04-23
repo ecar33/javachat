@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import com.javachat.cli.CommandListener;
 
+
 public class Server implements Runnable {
     private ServerSocket serverSocket;
     private final SessionManager sessionManager;
@@ -81,7 +82,6 @@ public class Server implements Runnable {
         Thread serverThread = new Thread(server);
         serverThread.start();
         System.out.println("Server started and waiting for connections...");
-
 
         CommandListener cli = new CommandListener(server);
         Thread commandThread = new Thread(cli);

@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.function.Consumer;
 import com.javachat.message.Message;
+import com.javachat.message.ReceivedMessage;
+import com.javachat.message.SentMessage;
 import com.javachat.user.User;
 import com.google.gson.Gson;
 
@@ -31,6 +33,7 @@ public class ChatClient {
             out.flush();
 
         } catch (IOException e) {
+            System.out.println("Connection was unsuccesful to the server, make sure the server is online.");
             e.printStackTrace();
         }
     }
@@ -43,8 +46,11 @@ public class ChatClient {
                 // Continuously read messages from the server
                 while ((jsonString = in.readLine()) != null) {
                     // Use the Consumer to handle the received message
-                    Message msg = gson.fromJson(jsonString, Message.class);
-                    onMessageReceived.accept(msg);
+                    SentMessage msg = gson.fromJson(jsonString, SentMessage.class);
+
+                    // Convert to ReceivedMessage
+                    ReceivedMessage receivedMsg = new ReceivedMessage(msg.getContent(), msg.getUserId());
+                    onMessageReceived.accept(receivedMsg);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -69,7 +75,7 @@ public class ChatClient {
             if (socket != null && !socket.isClosed())
                 socket.close();
             
-            System.out.println("Client socket properly clossed");
+            System.out.println("Client socket properly closed");
 
         } catch (IOException e) {
             System.out.println("Error closing socket for user " + user.getUserId());

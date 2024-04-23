@@ -1,3 +1,23 @@
 .list-cell {
-  -fx-background-color: transparent;
+  -fx-padding: 8px; /* Add padding inside the cell */
+  -fx-border-color: transparent; /* No border by default */
+  -fx-background-color: transparent; /* No background by default */
+}
+
+.sent-message {
+  -fx-background-color: #DCF8C6; 
+  -fx-background-radius: 12px; 
+  -fx-padding: 10px 15px; 
+  -fx-alignment: center-right; 
+  -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); 
+  -fx-border-radius: 12px; 
+}
+
+.received-message {
+  -fx-background-color: #ccd9e9; 
+  -fx-background-radius: 12px; 
+  -fx-padding: 10px 15px; 
+  -fx-alignment: center-left; 
+  -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); 
+  -fx-border-radius: 12px; 
 }

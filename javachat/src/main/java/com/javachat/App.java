@@ -16,8 +16,22 @@ import java.io.IOException;
  * JavaFX App
  */
 public class App extends Application {
+    private static App instance;
     private Scene scene;
     private ChatClient client;
+
+    public App() {
+        // Singleton pattern to ensure there is only 1 instance of 'App'
+        if (instance == null) {
+            instance = this;
+        } else {
+            throw new IllegalStateException("Cannot create more than 1 instance of App");
+        }
+    }
+
+    public static App getInstance() {
+        return instance;
+    }
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -41,6 +55,9 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+
+        // Save the instance
+        instance = this;
     }
 
     @Override
@@ -55,7 +72,11 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxml + ".fxml"));
         scene.setRoot(fxmlLoader.load());
         PrimaryController controller = fxmlLoader.getController();
-        controller.setChatClient(client); // Re-inject the client if switching roots
+        if (controller != null) {
+            controller.setChatClient(client); // Re-inject the client if switching roots
+        } else {
+            System.out.println("No controller found for this FXML");
+        }
     }
 
     public static void main(String[] args) {

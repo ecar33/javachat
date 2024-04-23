@@ -2,30 +2,36 @@ package com.javachat.message;
 
 public class SentMessage implements Message{
   private final String text;
-  private final String userID;
+  private final String userId;
 
-  public SentMessage(String text, String userID) {
+  public SentMessage(String text, String userId) {
     this.text = text;
-    this.userID = userID;
+    this.userId = userId;
   }
 
   public String getContent() {
     return text;
   }
 
-  public String getUserID() {
-    return userID;
+  public String getUserId() {
+    return userId;
   }
 
   @Override
   public String getTextRepresentation() {
-      return "Me with id: " + userID + text;
+      return "Me: " + text;
   }
 
   @Override
   public String getStyleClass() {
       return "sent-message";
   }
+
+  @Override 
+  public boolean isSentByUser() {
+    return true;
+  }
+
 
 
 }

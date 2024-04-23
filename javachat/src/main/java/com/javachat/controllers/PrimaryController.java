@@ -49,22 +49,8 @@ public class PrimaryController {
                 new Background(new BackgroundFill(Color.rgb(0, 196, 65), CornerRadii.EMPTY, Insets.EMPTY)));
 
         chatTextField.setOnKeyPressed(event -> handleEnterKeyPress(event));
-
-        chatListView.setCellFactory(param -> new ListCell<Message>() {
-            @Override
-            protected void updateItem(Message message, boolean empty) {
-                super.updateItem(message, empty);
-
-                if (empty || message == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(message.getTextRepresentation());
-                    setStyle(message.getStyleClass());
-                    setBackground(Background.EMPTY);
-                }
-            }
-        });
+        
+        chatListView.setCellFactory(param -> new MessageCell());
 
         // Set the BackgroundImage
         BackgroundImage bgImage = BGImageLoader.load("/com/javachat/background.png");
