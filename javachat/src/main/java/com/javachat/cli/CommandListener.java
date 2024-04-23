@@ -26,8 +26,8 @@ public class CommandListener implements Runnable {
 
                 if ("broadcast".equalsIgnoreCase(line.split(" ")[0])) {
                     String messageContent = line.substring(line.indexOf(' ') + 1);
-                    SentMessage message = new SentMessage(messageContent, "server");
-                    sessionManager.broadcastMessage(message, "server");
+                    SentMessage message = new SentMessage(messageContent, "@server");
+                    sessionManager.broadcastMessage(message, "@server");
                     continue;
                 }
                 switch (line) {
@@ -41,7 +41,7 @@ public class CommandListener implements Runnable {
                         System.out.println("Available commands: status, users");
                         break;
                     default:
-                        System.out.println("Invalid command. Type 'help");
+                        System.out.println("Invalid command. Type 'help'");
                         break;
                 }
             }

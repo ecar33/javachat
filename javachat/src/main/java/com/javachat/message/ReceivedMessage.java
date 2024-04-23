@@ -19,7 +19,7 @@ public class ReceivedMessage implements Message{
 
   @Override
   public String getTextRepresentation() {
-      return "Them with id: " + userId + text;
+      return userId + ' ' + text;
   }
 
   @Override

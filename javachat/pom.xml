@@ -65,6 +65,8 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.6.0</version>
                         <configuration>
+                            <!-- For executing the server -->
+                            <!-- Usage: mvn exec:java -Pserver -->
                             <mainClass>com.javachat.server.Server</mainClass>
                         </configuration>
                     </plugin>
