@@ -2,17 +2,26 @@ package com.javachat.server;
 
 import java.util.concurrent.ConcurrentHashMap;
 import com.javachat.message.Message;
+import com.javachat.user.UserInfo;
 
 
 public class SessionManager {
   private ConcurrentHashMap<String, UserSession> activeSessions;
+  private ConcurrentHashMap<String, UserInfo> activeUserInfos;
+
 
   public SessionManager() {
       activeSessions = new ConcurrentHashMap<>();
+      activeUserInfos = new ConcurrentHashMap<>();
   }
 
   public void addSession(String userId, UserSession session) {
       activeSessions.put(userId, session);
+  }
+
+  public void addUserInfo(String userId, UserInfo userInfo) {
+    activeUserInfos.put(userId, userInfo);
+
   }
 
   public void removeSession(String userId) {
@@ -29,6 +38,10 @@ public class SessionManager {
 
   public UserSession getSession(String userId) {
       return activeSessions.get(userId);
+  }
+
+  public UserInfo getUserInfo(String userId) {
+    return activeUserInfos.get(userId);
   }
 
   public void broadcastMessage(Message message, String senderUserID) {

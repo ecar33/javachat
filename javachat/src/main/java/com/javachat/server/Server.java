@@ -6,7 +6,8 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import com.javachat.cli.CommandListener;
-
+import com.google.gson.Gson;
+import com.javachat.user.UserInfo;
 
 public class Server implements Runnable {
     private ServerSocket serverSocket;
@@ -36,6 +37,7 @@ public class Server implements Runnable {
         private final SessionManager sessionManager;
         private UserSession userSession;
         private String userId;
+        private Gson gson = new Gson();
 
         public ClientHandler(Socket socket, Server server) {
             this.clientSocket = socket;
@@ -46,24 +48,29 @@ public class Server implements Runnable {
         @Override
         public void run() {
             try {
-                // Create a temp reader to read the userId sent by the client
                 BufferedReader tempReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                userId = tempReader.readLine(); // Assuming the first line is the userId
+                String inputLine = tempReader.readLine();
+                UserInfo clientUserInfo = gson.fromJson(inputLine, UserInfo.class);
 
-                if (userId != null) {
-                    System.out.println("Client connected with userID: " + userId);
+                // Ensure UserInfo is not null and has necessary data
+                if (clientUserInfo != null && clientUserInfo.getUserId() != null) {
+                    System.out.println("Client connected with userID: " + clientUserInfo.getUserId());
+                    this.userId = clientUserInfo.getUserId(); // Properly initialize userId
                     this.userSession = new UserSession(clientSocket, userId, server);
+
                     sessionManager.addSession(userId, userSession);
+                    sessionManager.addUserInfo(userId, clientUserInfo);
+                    
                     userSession.processMessages();
                 } else {
-                    System.out.println("Failed to read userId from the client.");
+                    System.out.println("Failed to read or parse UserInfo from the client.");
                 }
             } catch (IOException e) {
                 System.out.println("Error handling client #" + clientSocket + ": " + e.getMessage());
             } finally {
                 if (userId != null) {
                     sessionManager.removeSession(userId);
-                    System.out.println("Session for user with id " + userId + "removed.");
+                    System.out.println("Session for user with id " + userId + " removed.");
                     if (userSession != null) {
                         userSession.closeSession();
                         System.out.println("Session closed for user with id " + userId);
@@ -71,6 +78,7 @@ public class Server implements Runnable {
                 }
             }
         }
+
     }
 
     public SessionManager getSessionManager() {

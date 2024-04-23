@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeoutException;
 
+import com.javachat.user.UserInfo;
 import com.javachat.message.*;
 import com.google.gson.Gson;
 
@@ -52,8 +53,17 @@ public class UserSession {
   }
 
   private void handleMessage(Message message) {
-    // Process the message here (e.g., log, modify, forward)
-    System.out.println("Received from " + userId + ": " + message.getContent());
+    // For procesing messages before broadcasting to other users
+    UserInfo senderUserInfo = sessionManager.getUserInfo(message.getUserId());
+
+    if (senderUserInfo != null) {
+      System.out.println("Message received from " + senderUserInfo.getUserName());
+    } else {
+      System.out.println("UserInfo couldn't be found.");
+    }
+
+    
+
     sessionManager.broadcastMessage(message, userId);
   }
 

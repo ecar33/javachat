@@ -7,6 +7,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import com.javachat.user.User;
+import com.javachat.user.UserInfo;
+
 import com.javachat.client.ChatClient;
 import com.javachat.controllers.PrimaryController;
 
@@ -36,7 +38,9 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         User user = new User("Jimmybob");
-        this.client = new ChatClient(user, "127.0.0.1", 5000);
+        UserInfo userInfo = new UserInfo(user.getUserId(), user.getUserName());
+
+        this.client = new ChatClient("127.0.0.1", 5000, userInfo);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("chatview.fxml"));
         Parent root = fxmlLoader.load(); // Load the FXML and create the controller

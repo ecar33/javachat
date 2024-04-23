@@ -6,6 +6,7 @@ module com.javachat {
     opens com.javachat to javafx.fxml;
     opens com.javachat.controllers to javafx.fxml;
     opens com.javachat.message to com.google.gson;
+    opens com.javachat.user to com.google.gson;
 
     exports com.javachat;
 }

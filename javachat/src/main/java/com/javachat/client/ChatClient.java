@@ -10,6 +10,7 @@ import com.javachat.message.Message;
 import com.javachat.message.ReceivedMessage;
 import com.javachat.message.SentMessage;
 import com.javachat.user.User;
+import com.javachat.user.UserInfo;
 import com.google.gson.Gson;
 
 public class ChatClient {
@@ -17,19 +18,19 @@ public class ChatClient {
     private BufferedReader in;
     private PrintWriter out;
     private Gson gson = new Gson();
-    private User user;
+    private UserInfo userInfo;
     private Consumer<Message> onMessageReceived;
 
-    public ChatClient(User user, String serverAddress, int port) {
-        this.user = user;
+    public ChatClient(String serverAddress, int port, UserInfo userInfo) {
+        this.userInfo = userInfo;
 
         try {
             socket = new Socket(serverAddress, port);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Send the userID of the client to the server
-            out.println(user.getUserId());
+            // Send the UserInfo of the client to the server
+            out.println(gson.toJson(userInfo));
             out.flush();
 
         } catch (IOException e) {
@@ -78,7 +79,7 @@ public class ChatClient {
             System.out.println("Client socket properly closed");
 
         } catch (IOException e) {
-            System.out.println("Error closing socket for user " + user.getUserId());
+            System.out.println("Error closing socket for user " + userInfo.getUserId());
         }
     }
 }
