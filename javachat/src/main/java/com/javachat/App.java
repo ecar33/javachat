@@ -42,7 +42,7 @@ public class App extends Application {
 
         this.client = new ChatClient("127.0.0.1", 5000, userInfo);
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login_view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("chat_view.fxml"));
         Parent root = fxmlLoader.load(); // Load the FXML and create the controller
 
         // After loading, get the controller and set the client
