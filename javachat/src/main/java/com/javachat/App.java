@@ -11,6 +11,7 @@ import com.javachat.user.UserInfo;
 
 import com.javachat.client.ChatClient;
 import com.javachat.controllers.PrimaryController;
+import com.javachat.controllers.LoginController;
 
 import java.io.IOException;
 
@@ -22,68 +23,55 @@ public class App extends Application {
     private Scene scene;
     private ChatClient client;
 
-    public App() {
-        // Singleton pattern to ensure there is only 1 instance of 'App'
-        if (instance == null) {
-            instance = this;
-        } else {
-            throw new IllegalStateException("Cannot create more than 1 instance of App");
-        }
-    }
-
     public static App getInstance() {
         return instance;
     }
 
     @Override
     public void start(Stage stage) throws IOException {
-        User user = new User("Jimmybob");
-        UserInfo userInfo = new UserInfo(user.getUserId(), user.getUserName());
-
-        this.client = new ChatClient("127.0.0.1", 5000, userInfo);
-
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("chat_view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login_view.fxml"));
         Parent root = fxmlLoader.load(); // Load the FXML and create the controller
 
-        // After loading, get the controller and set the client
-        PrimaryController controller = fxmlLoader.getController();
-        if (controller != null) {
-            controller.setChatClient(client);
-            controller.setUser(user);
-            controller.setupClient();
-        } else {
-            System.out.println("Can't find controller for this fxml");
+        // Pass the App instance to the login controller
+        LoginController loginController = fxmlLoader.getController();
+        if (loginController != null) {
+            loginController.setApp(this);
         }
 
         scene = new Scene(root, 600, 400);
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
 
-        // Save the instance
-        instance = this;
+    public void initializeClientAndSwitchScene(UserInfo userInfo) {
+        this.client = new ChatClient("127.0.0.1", 5000, userInfo); // Initialize with actual server details
+        setRoot("chat_view", userInfo); // Assuming userInfo holds a reference to User
+    }
+
+    public void setRoot(String fxml, UserInfo userInfo) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxml + ".fxml"));
+            Parent root = fxmlLoader.load();
+            scene.setRoot(root);
+            PrimaryController controller = fxmlLoader.getController();
+            if (controller != null) {
+                controller.setChatClient(client);
+                controller.setUserInfo(userInfo);
+                controller.setupClient();
+            } else {
+                System.out.println("No controller found for this FXML");
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading FXML: " + fxml);
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void stop() {
         if (client != null) {
-            client.closeConnection(); // Ensure the connection is properly closed on stop
-            System.out.println("Client socket has closed successfully.");
+            client.closeConnection();
         }
-    }
-
-    public void setRoot(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxml + ".fxml"));
-        scene.setRoot(fxmlLoader.load());
-        PrimaryController controller = fxmlLoader.getController();
-        if (controller != null) {
-            controller.setChatClient(client); // Re-inject the client if switching roots
-        } else {
-            System.out.println("No controller found for this FXML");
-        }
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

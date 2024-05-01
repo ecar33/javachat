@@ -1,36 +1,38 @@
 package com.javachat.message;
 
-public class ReceivedMessage implements Message{
-  private final String text;
-  private final String userId;
+import com.javachat.user.UserInfo;
 
-  public ReceivedMessage(String text, String userId) {
-    this.text = text;
-    this.userId = userId;
-  }
+public class ReceivedMessage implements Message {
+    private final String text;
+    private final UserInfo userInfo;
 
-  public String getContent() {
-    return text;
-  }
+    public ReceivedMessage(String text, UserInfo userInfo) {
+        this.text = text;
+        this.userInfo = userInfo;
+    }
 
-  public String getUserId() {
-    return userId;
-  }
+    @Override
+    public String getContent() {
+        return text;
+    }
 
-  @Override
-  public String getTextRepresentation() {
-      return userId + ' ' + text;
-  }
+    @Override
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
 
-  @Override
-  public String getStyleClass() {
-      return "received-message";
-  }
+    @Override
+    public String getTextRepresentation() {
+        return userInfo.getUserName() + ": " +  text;
+    }
 
-  @Override 
-  public boolean isSentByUser() {
-    return false;
-  }
+    @Override
+    public String getStyleClass() {
+        return "received-message";
+    }
 
-
+    @Override 
+    public boolean isSentByUser() {
+        return false;
+    }
 }

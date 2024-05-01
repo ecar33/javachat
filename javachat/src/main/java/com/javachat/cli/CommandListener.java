@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import com.javachat.server.Server;
 import com.javachat.server.SessionManager;
+import com.javachat.user.UserInfo;
 import com.javachat.message.SentMessage;
 
 public class CommandListener implements Runnable {
@@ -18,6 +19,8 @@ public class CommandListener implements Runnable {
 
     @Override
     public void run() {
+        UserInfo serverUInfo = new UserInfo("server", "@server");
+        
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             String line;
 
@@ -26,8 +29,8 @@ public class CommandListener implements Runnable {
 
                 if ("broadcast".equalsIgnoreCase(line.split(" ")[0])) {
                     String messageContent = line.substring(line.indexOf(' ') + 1);
-                    SentMessage message = new SentMessage(messageContent, "@server");
-                    sessionManager.broadcastMessage(message, "@server");
+                    SentMessage message = new SentMessage(messageContent, serverUInfo);
+                    sessionManager.broadcastMessage(message, "server");
                     continue;
                 }
                 switch (line) {

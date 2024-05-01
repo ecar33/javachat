@@ -1,9 +1,11 @@
 package com.javachat.message;
 
+import com.javachat.user.UserInfo;
+
 public interface Message {
   String getTextRepresentation();
   String getStyleClass();
   String getContent();
-  String getUserId();
+  UserInfo getUserInfo();
   boolean isSentByUser();
 }

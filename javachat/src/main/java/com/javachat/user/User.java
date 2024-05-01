@@ -1,7 +1,5 @@
 package com.javachat.user;
 
-import java.io.*;
-
 public class User {
   private String userName;
   private String userId;

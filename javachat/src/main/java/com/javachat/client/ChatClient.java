@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import com.javachat.message.Message;
 import com.javachat.message.ReceivedMessage;
 import com.javachat.message.SentMessage;
-import com.javachat.user.User;
 import com.javachat.user.UserInfo;
 import com.google.gson.Gson;
 
@@ -50,7 +49,7 @@ public class ChatClient {
                     SentMessage msg = gson.fromJson(jsonString, SentMessage.class);
 
                     // Convert to ReceivedMessage
-                    ReceivedMessage receivedMsg = new ReceivedMessage(msg.getContent(), msg.getUserId());
+                    ReceivedMessage receivedMsg = new ReceivedMessage(msg.getContent(), msg.getUserInfo());
                     onMessageReceived.accept(receivedMsg);
                 }
             } catch (Exception e) {

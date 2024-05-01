@@ -54,7 +54,7 @@ public class UserSession {
 
   private void handleMessage(Message message) {
     // For procesing messages before broadcasting to other users
-    UserInfo senderUserInfo = sessionManager.getUserInfo(message.getUserId());
+    UserInfo senderUserInfo = message.getUserInfo();
 
     if (senderUserInfo != null) {
       System.out.println("Message received from " + senderUserInfo.getUserName());

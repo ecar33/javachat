@@ -1,7 +1,6 @@
 package com.javachat.message;
 
 import javafx.scene.control.ListCell;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;

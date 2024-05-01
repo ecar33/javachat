@@ -2,7 +2,6 @@ package com.javachat.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -23,12 +22,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.layout.CornerRadii;
 import javafx.geometry.Insets;
 
-import com.javachat.user.User;
+import com.javachat.user.UserInfo;
 
 public class PrimaryController {
 
     private ChatClient client;
-    private User user;
+    private UserInfo userInfo;
 
     @FXML
     private TextField chatTextField;
@@ -110,7 +109,7 @@ public class PrimaryController {
             return; // Do not send empty messages
         }
 
-        SentMessage msg = new SentMessage(txt, user.getUserId());
+        SentMessage msg = new SentMessage(txt, userInfo);
         client.sendMessage(msg);
 
         chatTextField.clear();
@@ -122,8 +121,8 @@ public class PrimaryController {
         this.client = client;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserInfo(UserInfo userInfo) {
+        this.userInfo = userInfo;
     }
 
 }
