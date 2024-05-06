@@ -36,6 +36,7 @@ public class LoginController {
     private void handleHistoryButtonPress(ActionEvent event) {
         String username = usernameField.getText().trim();
         if (username.isEmpty()) {
+            System.out.println("Username is empty.");
             return; // Do not login with an empty username
         }
         System.out.println("Viewing history for: " + username);

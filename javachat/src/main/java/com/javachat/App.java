@@ -15,10 +15,10 @@ import com.javachat.controllers.LoginController;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+
 import com.javachat.user.UserMessageHistoryHandler;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 public class App extends Application {
@@ -29,6 +29,7 @@ public class App extends Application {
     private UserMessageHistoryHandler messageHistoryHandler;
     private ConcurrentHashMap<String, List<Message>> messagesByUser;
     private volatile boolean alreadySaved = false;
+    private File[] historyFiles; // Holds the chat history files for the current user
 
     public static App getInstance() {
         return instance;
@@ -45,8 +46,11 @@ public class App extends Application {
         this.messageHistoryHandler = new UserMessageHistoryHandler(userInfo, messagesByUser);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             App instance = App.getInstance();
-            if (instance != null) {
+            if (instance != null && instance.userInfo != null) { // Check if userInfo is set
                 instance.saveMessagesIfNeeded();
+            } else {
+                // Log or handle the situation where no user info is available
+                System.out.println("Shutdown process initiated without user info.");
             }
         }));
     }
@@ -58,6 +62,7 @@ public class App extends Application {
         LoginController loginController = fxmlLoader.getController();
         if (loginController != null) {
             loginController.setApp(this);
+            System.out.println("App set for login view");
         }
         scene = new Scene(root, 600, 400);
         stage.setScene(scene);
@@ -70,64 +75,63 @@ public class App extends Application {
         this.client = new ChatClient("127.0.0.1", 5000, userInfo, instance);
         this.messageHistoryHandler = new UserMessageHistoryHandler(userInfo, messagesByUser);
         System.out.println("MHH initialized with user: " + userInfo.getUserName());
-        setRoot("chat_view", userInfo);
+        setRootForChatClient("chat_view", userInfo);
     }
 
-    public void setRoot(String fxml, UserInfo userInfo) {
-        try {
-            // Ensure userInfo is initialized here
-            setUserInfo(userInfo);
-
-            if (userInfo != null) {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxml + ".fxml"));
-                Parent root = fxmlLoader.load();
-                scene.setRoot(root);
-                PrimaryController controller = fxmlLoader.getController();
-                if (controller != null) {
-                    controller.setChatClient(client);
-                    controller.setUserInfo(userInfo);
-                    controller.setupClient();
-                } else {
-                    System.out.println("No controller found for this FXML");
-                }
+    public void setRootForChatClient(String fxml, UserInfo userInfo) {
+        loadView(fxml + ".fxml", controller -> {
+            if (controller instanceof PrimaryController) {
+                ((PrimaryController) controller).setChatClient(client);
+                ((PrimaryController) controller).setChatClient(client);
+                ((PrimaryController) controller).setUserInfo(userInfo);
+                ((PrimaryController) controller).setupClient();
             }
-        } catch (IOException e) {
-            System.out.println("Error loading FXML: " + fxml);
-            e.printStackTrace();
+        });
+    }
+
+    public boolean getFiles(String username) {
+        File userDir = new File("userdata/" + username + "/messages");
+        if (!userDir.exists() || !userDir.isDirectory()) {
+            System.out.println("No chat history available for: " + username);
+            return false; // Indicate failure to find files
         }
+
+        File[] files = userDir.listFiles((dir, name) -> name.endsWith(".json"));
+        if (files == null || files.length == 0) {
+            System.out.println("No chat history files found for: " + username);
+            return false; // Indicate failure to find files
+        }
+
+        historyFiles = files; // Set the sorted files to the instance variable
+        return true; // Indicate successful file retrieval
     }
 
     public void cacheMessage(Message msg) {
         messageHistoryHandler.cacheMessage(msg);
     }
 
-    public void switchToHistoryView(String username) {
+    public void loadView(String fxmlFile, Consumer<Object> setupController) {
         try {
-            File userDir = new File("userdata/" + username + "/messages");
-            if (!userDir.exists() || !userDir.isDirectory()) {
-                System.out.println("No chat history available for: " + username);
-                return; // or notify the user via the UI
-            }
-
-            File[] files = userDir.listFiles((dir, name) -> name.endsWith(".json"));
-            if (files == null || files.length == 0) {
-                System.out.println("No chat history files found for: " + username);
-                return; // or notify the user via the UI
-            }
-
-            Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
-
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/path/to/ChatHistoryView.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlFile));
             Parent root = fxmlLoader.load();
-            scene.setRoot(root);
-            HistoryController controller = fxmlLoader.getController();
-            if (controller != null) {
-                controller.setFiles(files);
+            Object controller = fxmlLoader.getController();
+            if (controller != null && setupController != null) {
+                setupController.accept(controller);
             }
+            scene.setRoot(root);
         } catch (IOException e) {
-            System.err.println("Error loading chat history view: " + e.getMessage());
+            System.err.println("Error loading FXML file: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void switchToHistoryView(String username) {
+        loadView("history_view" + ".fxml", controller -> {
+            if (controller instanceof HistoryController) {
+                ((HistoryController) controller).setFiles(historyFiles);
+                ((HistoryController) controller).setApp(instance);
+            }
+        });
     }
 
     private synchronized void saveMessagesIfNeeded() {

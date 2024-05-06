@@ -30,27 +30,29 @@ public class UserMessageHistoryHandler {
     }
 
     public void saveMessagesToFile() {
-        Gson gson = new Gson();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-        String timestamp = LocalDateTime.now().format(formatter);
-        String fileName = userInfo.getUserId() + "_" + timestamp + "_messages.json";
+        if (this.userInfo != null) {
+            Gson gson = new Gson();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+            String timestamp = LocalDateTime.now().format(formatter);
+            String fileName = userInfo.getUserId() + "_" + timestamp + "_messages.json";
 
-        Path userDirectory = Paths.get(USER_ID_DIRECTORY, userInfo.getUserName(), "messages");
+            Path userDirectory = Paths.get(USER_ID_DIRECTORY, userInfo.getUserName(), "messages");
 
-        try {
-            Files.createDirectories(userDirectory); 
+            try {
+                Files.createDirectories(userDirectory);
 
-            // Construct the path for the new file
-            Path filePath = userDirectory.resolve(fileName);
+                // Construct the path for the new file
+                Path filePath = userDirectory.resolve(fileName);
 
-            // Convert the messages list to JSON string
-            String json = gson.toJson(messagesByUser.get(userInfo.getUserId()));
-            if (!json.isEmpty()) {
-                Files.write(filePath, json.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
-                maintainFileCount(userDirectory);
+                // Convert the messages list to JSON string
+                String json = gson.toJson(messagesByUser.get(userInfo.getUserId()));
+                if (!json.isEmpty()) {
+                    Files.write(filePath, json.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+                    maintainFileCount(userDirectory);
+                }
+            } catch (IOException e) {
+                System.out.println("Failed to save messages: " + e.getMessage());
             }
-        } catch (IOException e) {
-            System.out.println("Failed to save messages: " + e.getMessage());
         }
     }
 
@@ -68,4 +70,3 @@ public class UserMessageHistoryHandler {
         }
     }
 }
-
