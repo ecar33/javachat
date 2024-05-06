@@ -9,7 +9,7 @@ public class User {
 
   public User(String userName) {
     this.userName = userName;
-    this.userId = UserIdHandler.getOrCreateUserId(userName);
+    this.userId = UserInfoHandler.getOrCreateUserId(userName);
   }
 
   public String getUserName() {

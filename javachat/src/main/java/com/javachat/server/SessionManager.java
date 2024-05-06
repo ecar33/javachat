@@ -1,5 +1,6 @@
 package com.javachat.server;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import com.javachat.message.Message;
 import com.javachat.user.UserInfo;
@@ -32,8 +33,14 @@ public class SessionManager {
   }
 
   public void printSessions() {
-    System.out.println("Current connected users: ");
+    System.out.println("Current active sessions: ");
     activeSessions.forEach((key, value) -> System.out.println(key + " = " + value));
+  }
+
+  public void printUsers() {
+    System.out.println("Current active users: ");
+    activeUserInfos.forEach((userId, userInfo) -> System.out.println(userInfo.getUserName()));
+
   }
 
   public UserSession getSession(String userId) {

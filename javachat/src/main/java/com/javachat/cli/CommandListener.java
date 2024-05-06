@@ -38,8 +38,10 @@ public class CommandListener implements Runnable {
                         System.out.println("Current server status: Active");
                         break;
                     case "users":
-                        server.getSessionManager().printSessions();
+                        server.getSessionManager().printUsers();
                         break;
+                    case "sessions":
+                        server.getSessionManager().printSessions();
                     case "help":
                         System.out.println("Available commands: status, users");
                         break;

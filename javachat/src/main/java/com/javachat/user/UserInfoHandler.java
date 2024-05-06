@@ -3,13 +3,13 @@ package com.javachat.user;
 import java.io.IOException;
 import java.nio.file.*;
 
-public class UserIdHandler {
+public class UserInfoHandler {
   
-  private static final String USER_ID_DIRECTORY = "src/main/resources/userdata/";
-  private static final String USER_ID_EXTENSION = "_userID.txt";
+  private static final String USER_ID_DIRECTORY = "userdata/";
+  private static final String USER_ID_EXTENSION = "userid.txt";
   
   public static String loadUserID(String userName) throws IOException {
-    Path filePath = Paths.get(USER_ID_DIRECTORY, userName + USER_ID_EXTENSION);
+    Path filePath = Paths.get(USER_ID_DIRECTORY + '/' + userName, USER_ID_EXTENSION);
     if (Files.exists(filePath)) {
       return new String(Files.readAllBytes(filePath));
     } else {
@@ -21,12 +21,12 @@ public class UserIdHandler {
   }
 
   public static void saveUserID(String userName, String userID) throws IOException {
-    Path filePath = Paths.get(USER_ID_DIRECTORY, userName + USER_ID_EXTENSION);
+    Path filePath = Paths.get(USER_ID_DIRECTORY + '/' + userName, USER_ID_EXTENSION);
     Files.write(filePath, userID.getBytes(), StandardOpenOption.CREATE);
   }
 
   public static String generateUniqueUserId() {
-    return java.util.UUID.randomUUID().toString(); // Generate a unique identifier
+    return java.util.UUID.randomUUID().toString().substring(0, 8); // Generate a unique identifier
   }
 
   public static String getOrCreateUserId(String userName) {

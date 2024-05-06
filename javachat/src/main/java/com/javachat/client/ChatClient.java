@@ -5,7 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+
+import com.javachat.App;
 import com.javachat.message.Message;
 import com.javachat.message.ReceivedMessage;
 import com.javachat.message.SentMessage;
@@ -15,13 +21,16 @@ import com.google.gson.Gson;
 public class ChatClient {
     private Socket socket;
     private BufferedReader in;
+    private App app;
     private PrintWriter out;
     private Gson gson = new Gson();
     private UserInfo userInfo;
     private Consumer<Message> onMessageReceived;
+    private ConcurrentHashMap<String, List<Message>> messagesByUser;
 
-    public ChatClient(String serverAddress, int port, UserInfo userInfo) {
+    public ChatClient(String serverAddress, int port, UserInfo userInfo, App app) {
         this.userInfo = userInfo;
+        this.app = app;
 
         try {
             socket = new Socket(serverAddress, port);
@@ -43,27 +52,27 @@ public class ChatClient {
         new Thread(() -> {
             try {
                 String jsonString;
-                // Continuously read messages from the server
                 while ((jsonString = in.readLine()) != null) {
-                    // Use the Consumer to handle the received message
                     SentMessage msg = gson.fromJson(jsonString, SentMessage.class);
-
-                    // Convert to ReceivedMessage
                     ReceivedMessage receivedMsg = new ReceivedMessage(msg.getContent(), msg.getUserInfo());
                     onMessageReceived.accept(receivedMsg);
+
+                    app.cacheMessage(msg);
                 }
+            } catch (IOException e) {
+                System.out.println("Connection lost.");
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Error processing message: " + e.getMessage());
             }
-
         }).start();
-
     }
 
     public void sendMessage(Message msg) {
         String jsonMessage = new Gson().toJson(msg); // Serialize the message to JSON
         out.println(jsonMessage); // Send the JSON string to the server
         out.flush(); // Ensure the data is sent immediately
+
+        app.cacheMessage(msg);
     }
 
     public void closeConnection() {
