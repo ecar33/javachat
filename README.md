@@ -9,3 +9,5 @@ This project aims to develop a chat application using JavaFX, focusing on advanc
 3. **User Profiles and Chat History:** Allow customization of user profiles and persistence of chat history using file I/O operations.
 4. **Persistence with File I/O:** Implement file I/O functionalities to store and retrieve chat history and user settings.
 5. **Robust Exception Handling:** Ensure robust application behavior by effectively handling potential runtime exceptions.
+
+![image](https://github.com/ecar33/javachat/assets/114954921/945f6ecb-b19e-48f9-8156-a231dbac555b)
