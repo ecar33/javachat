@@ -26,4 +26,6 @@ replay_pid*
 # maven build directory
 target/
 
+# userdata files
+javachat/userdata/*/
 

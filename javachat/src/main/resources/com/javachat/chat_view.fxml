@@ -8,13 +8,11 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" 
-minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" 
-stylesheets="@styles/chatViewStyle.css" xmlns="http://javafx.com/javafx/21" 
-xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javachat.controllers.PrimaryController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@styles/chatViewStyle.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javachat.controllers.PrimaryController">
    <children>
       <HBox alignment="CENTER_LEFT" prefHeight="45.0" prefWidth="600.0" style="-fx-background-color: #eee;">
          <children>
@@ -34,6 +32,11 @@ xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javachat.controllers.Prim
                   <Font size="14.0" />
                </font>
             </Label>
+            <Pane prefHeight="44.0" prefWidth="395.0">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Pane>
          </children>
       </HBox>
       <ListView fx:id="chatListView" prefHeight="305.0" prefWidth="600.0" />
@@ -47,5 +50,6 @@ xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.javachat.controllers.Prim
             </Button>
          </children>
       </HBox>
+      <Button fx:id="menuButton" maxWidth="Infinity" onAction="#handleMenuButtonPress" style="-fx-background-color: #d6d6d6;" text="Main Menu" />
    </children>
 </VBox>

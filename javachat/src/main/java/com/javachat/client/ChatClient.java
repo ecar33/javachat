@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -18,6 +16,10 @@ import com.javachat.message.SentMessage;
 import com.javachat.user.UserInfo;
 import com.google.gson.Gson;
 
+/**
+ * Handles the client-side functionality of the chat application, managing the connection,
+ * sending, and receiving messages.
+ */
 public class ChatClient {
     private Socket socket;
     private BufferedReader in;
@@ -28,6 +30,14 @@ public class ChatClient {
     private Consumer<Message> onMessageReceived;
     private ConcurrentHashMap<String, List<Message>> messagesByUser;
 
+    /**
+     * Constructs a new ChatClient, initializing the connection to the server.
+     * 
+     * @param serverAddress the IP address or hostname of the server
+     * @param port the port number on which the server is listening
+     * @param userInfo the user information for the client
+     * @param app the main application class
+     */
     public ChatClient(String serverAddress, int port, UserInfo userInfo, App app) {
         this.userInfo = userInfo;
         this.app = app;
@@ -42,11 +52,17 @@ public class ChatClient {
             out.flush();
 
         } catch (IOException e) {
-            System.out.println("Connection was unsuccesful to the server, make sure the server is online.");
+            System.out.println("Connection was unsuccessful to the server, make sure the server is online.");
             e.printStackTrace();
         }
     }
 
+    /**
+     * Starts a new thread to receive messages from the server continuously.
+     * Converts the received JSON messages into message objects and notifies the application.
+     *
+     * @param onMessageReceived a consumer that handles received messages
+     */
     public void startReceivingMessages(Consumer<Message> onMessageReceived) {
         this.onMessageReceived = onMessageReceived;
         new Thread(() -> {
@@ -67,14 +83,22 @@ public class ChatClient {
         }).start();
     }
 
+    /**
+     * Sends a message to the server.
+     *
+     * @param msg the message to send
+     */
     public void sendMessage(Message msg) {
-        String jsonMessage = new Gson().toJson(msg); // Serialize the message to JSON
+        String jsonMessage = gson.toJson(msg); // Serialize the message to JSON
         out.println(jsonMessage); // Send the JSON string to the server
         out.flush(); // Ensure the data is sent immediately
 
         app.cacheMessage(msg);
     }
 
+    /**
+     * Closes the client connection, including the input/output streams and the socket.
+     */
     public void closeConnection() {
         try {
             if (in != null)
