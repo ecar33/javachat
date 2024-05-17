@@ -12,10 +12,10 @@ JavaChat is a real-time messaging platform built with JavaFX. It allows users to
 ### Cloning the Repository
 Clone the JavaChat repository to your local machine:
 
-git clone git@github.com:unocsci2830/csci2830project-ecar33.git
+```bash
+git clone git@github.com:ecar33/javachat.git
 cd csci2830project-ecar33/javachat
-
-bash
+```
 
 
 ## Starting the Server
