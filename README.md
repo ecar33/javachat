@@ -22,9 +22,9 @@ bash
 
 To launch the JavaChat server, which will start listening for connections on `localhost:5000`, use the following Maven command:
 
+```bash
 mvn exec:java -Pserver
-
-shell
+```
 
 
 Upon launching, the server provides a CLI to display connected users or broadcast messages.
