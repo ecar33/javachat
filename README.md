@@ -75,3 +75,7 @@ This project is licensed under the MIT License - see the `LICENSE.md` file for d
 
 ## Acknowledgments
 - Hat tip to Jihen Barhoumi for the guidance on Java sockets, which inspired parts of the network communication in JavaChat. [Read the article here](https://medium.com/nerd-for-tech/create-a-chat-app-with-java-sockets-8449fdaa933).
+
+## UML 
+![image](https://github.com/ecar33/javachat/assets/114954921/525dabc7-1404-42ec-ac57-7a92ead9c101)
+
